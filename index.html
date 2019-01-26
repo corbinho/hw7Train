@@ -50,7 +50,7 @@
                             <th scope="col" id="trainName">Train Name</th>
                             <th scope="col" id="destination">Destination</th>
                             <th scope="col" id="frequency">Frequency (min)</th>
-                            <th scope="col" id="nextArrival">Next Arrival</th>
+                            <th scope="col" id="a">Next Arrival</th>
                             <th scope="col" id="minAway">Minutes Away</th>
 
                         </tr>
@@ -123,27 +123,41 @@
             var destination = $("#form-dest").val();
             console.log(destination)
             var startDate = $("#form-firstTrain").val().trim();
-            console.log(startDate)
+            var firstTimeConverted = moment(startDate, "HH:mm").subtract(1, "years");
+            console.log(firstTimeConverted);
+            //current time
+            var currentTime = moment();
+            console.log("CURRENT TIME: " + moment(currentTime).format("hh:mm"));
+
+            // Difference between the times
+            var diffTime = moment().diff(moment(firstTimeConverted), "minutes");
+            console.log("DIFFERENCE IN TIME: " + diffTime);
             var frequency = $("#form-freq").val().trim();
-            //get the current time
-            var now = new moment().format("HH:mm");
-            console.log(now + "type of now: " + typeof(now));
-            var start = moment.utc(startDate, "HH:mm");
-            var end = moment.utc(now, "HH:mm");
-            console.log(start);
-            console.log(end);
             
-            
-            
-            
+            var tRemainder = diffTime % frequency;
+            console.log(tRemainder);
+
+            // Minute Until Train
+            var tMinutesTillTrain = frequency - tRemainder;
+            console.log("MINUTES TILL TRAIN: " + tMinutesTillTrain);
+
+            // Next Train
+            var nextTrain = moment().add(tMinutesTillTrain, "minutes");
+            console.log("ARRIVAL TIME: " + moment(nextTrain).format("hh:mm"));
+            var nextTrain1 = moment(nextTrain).format("hh:mm");
+            console.log(nextTrain1);
+
+
+
+
             //save all the input to an object
             var newTrain = {
                 name: name,
                 destination: destination,
                 frequency: frequency,
-                //nextArrival: nextarrival,
-               // minsaway: timeUntilNext,
-                 
+                nextArrival: nextTrain1,
+                minsaway: tMinutesTillTrain,
+
             }
             //push the data to the DB
             database.ref().push(newTrain);
@@ -162,14 +176,14 @@
             var newTd3 = $("<td>");
             var newTd4 = $("<td>");
             var newTd5 = $("<td>");
-            
+
             //add all the db text
             newTd1.text(newTrain.name);
             newTd2.text(newTrain.destination);
             newTd3.text(newTrain.frequency);
             newTd4.text(newTrain.nextArrival);
             newTd5.text(newTrain.minsaway);
-            
+
             //append all the new row values
             newTr.append(newTd1, newTd2, newTd3, newTd4, newTd5);
             //get the table body
